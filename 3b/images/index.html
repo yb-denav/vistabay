@@ -1,1 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Photo Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        .gallery {
+            display: flex; /* Use flexbox for image layout */
+            flex-wrap: wrap; /* Allow images to wrap to the next line */
+            justify-content: center; /* Center images horizontally */
+            gap: 20px; /* Space between images */
+            max-width: 900px; /* Max width for your gallery */
+            margin: 20px auto; /* Center the gallery block */
+        }
+        .gallery img {
+            max-width: 100%; /* Make images responsive to their container */
+            height: auto; /* Maintain aspect ratio */
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>My Awesome Photos</h1>
+    <p>Check out my latest snaps!</p>
 
+    <div class="gallery">
+        <img src="pexels-shonejai-445753-1227511.jpg" alt="A beautiful landscape photo">
+        <img src="pexels-thatguycraig000-1563356.jpg" alt="A close-up of a flower">
+
+        </div>
+
+    <p>More photos coming soon!</p>
+</body>
+</html>
