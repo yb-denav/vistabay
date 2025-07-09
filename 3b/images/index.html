@@ -3,45 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Photo Gallery</title>
+    <title>Full Page Photo Display</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-            text-align: center;
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Prevent scrollbars if image is slightly larger than viewport */
+            background-color: #000; /* Black background for transition */
         }
-        h1 {
-            color: #0056b3;
+        #fullscreen-image {
+            position: absolute; /* Allows it to cover the entire viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* This makes the image cover the entire area without distortion, cropping as needed */
+            object-position: center; /* Center the image within its bounds */
+            opacity: 0; /* Start hidden for fade-in effect */
+            transition: opacity 1s ease-in-out; /* Smooth fade transition */
         }
-        .gallery {
-            display: flex; /* Use flexbox for image layout */
-            flex-wrap: wrap; /* Allow images to wrap to the next line */
-            justify-content: center; /* Center images horizontally */
-            gap: 20px; /* Space between images */
-            max-width: 900px; /* Max width for your gallery */
-            margin: 20px auto; /* Center the gallery block */
-        }
-        .gallery img {
-            max-width: 100%; /* Make images responsive to their container */
-            height: auto; /* Maintain aspect ratio */
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        #fullscreen-image.active {
+            opacity: 1; /* Make visible when active */
         }
     </style>
 </head>
 <body>
-    <h1>My Awesome Photos</h1>
-    <p>Check out my latest snaps!</p>
 
-    <div class="gallery">
-        <img src="pexels-shonejai-445753-1227511.jpg" alt="A beautiful landscape photo">
-        <img src="pexels-thatguycraig000-1563356.jpg" alt="A close-up of a flower">
+    <img id="fullscreen-image" src="" alt="Rotating Image">
 
-        </div>
+    <script>
+        // === IMPORTANT: List your image filenames here ===
+        // Ensure these names EXACTLY match the files in the '3b/images' folder, including case.
+        const imageFilenames = [
+            'pexels-shonejai-445753-1227511.jpg',   // Replace with your first image filename
+            'pexels-thatguycraig000-1563356.jpg'    // Replace with your second image filename
+        ];
 
-    <p>More photos coming soon!</p>
+        let currentIndex = 0;
+        const imgElement = document.getElementById('fullscreen-image');
+        const fadeDuration = 1000; // 1 second for fade transition
+        const displayDuration = 5000; // 5 seconds display time per image
+
+        function showNextImage() {
+            // Remove 'active' class to start fade-out
+            imgElement.classList.remove('active');
+
+            setTimeout(() => {
+                // Change image source after fade-out starts
+                imgElement.src = imageFilenames[currentIndex];
+                imgElement.alt = `Image ${currentIndex + 1}`; // Update alt text
+
+                // Add 'active' class to trigger fade-in
+                imgElement.classList.add('active');
+
+                // Move to the next image, loop back if at the end
+                currentIndex = (currentIndex + 1) % imageFilenames.length;
+            }, fadeDuration); // Wait for fade-out to complete before changing src and fading in
+        }
+
+        // Show the first image immediately
+        if (imageFilenames.length > 0) {
+            imgElement.src = imageFilenames[currentIndex];
+            imgElement.alt = `Image ${currentIndex + 1}`;
+            imgElement.classList.add('active'); // Make first image visible immediately
+            currentIndex = (currentIndex + 1) % imageFilenames.length;
+
+            // Start the slideshow after the first image has been displayed
+            setInterval(showNextImage, displayDuration);
+        } else {
+            console.warn("No images listed in imageFilenames array. Please add your image names.");
+            // Optionally display a placeholder or message if no images are found
+            imgElement.src = "https://via.placeholder.com/1920x1080?text=No+Images+Found";
+            imgElement.alt = "Placeholder image: No images found";
+            imgElement.classList.add('active');
+        }
+
+    </script>
+
 </body>
 </html>
