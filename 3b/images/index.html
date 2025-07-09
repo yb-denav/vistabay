@@ -37,45 +37,100 @@
         // === IMPORTANT: List your image filenames here ===
         // Ensure these names EXACTLY match the files in the '3b/images' folder, including case.
         const imageFilenames = [
-            'pexels-shonejai-445753-1227511.jpg',   // Replace with your first image filename
-            'pexels-thatguycraig000-1563356.jpg'    // Replace with your second image filename
+            'slide01.jpg',
+            'slide02.jpg',
+            'slide03.jpg',
+            'slide04.jpg',
+            'slide05.jpg',
+            'slide06.jpg',
+            'slide07.jpg',
+            'slide08.jpg',
+            'slide09.jpg',
+            'slide10.jpg'
         ];
 
         let currentIndex = 0;
+        let slideshowInterval; // Variable to hold our interval ID
         const imgElement = document.getElementById('fullscreen-image');
-        const fadeDuration = 1000; // 1 second for fade transition
-        const displayDuration = 15000; // 5 seconds display time per image
+        const fadeDuration = 0; // 1 second for fade transition
+        const displayDuration = 15000; // 15 seconds display time per image (before fade-out starts)
 
-        function showNextImage() {
-            // Remove 'active' class to start fade-out
-            imgElement.classList.remove('active');
-
-            setTimeout(() => {
-                // Change image source after fade-out starts
-                imgElement.src = imageFilenames[currentIndex];
-                imgElement.alt = `Image ${currentIndex + 1}`; // Update alt text
-
-                // Add 'active' class to trigger fade-in
-                imgElement.classList.add('active');
-
-                // Move to the next image, loop back if at the end
-                currentIndex = (currentIndex + 1) % imageFilenames.length;
-            }, fadeDuration); // Wait for fade-out to complete before changing src and fading in
+        // Function to safely get the next index, looping around
+        function getNextIndex() {
+            return (currentIndex + 1) % imageFilenames.length;
         }
+
+        // Function to display an image at a specific index
+        function displayImage(indexToDisplay) {
+            // Check if there are any images left to display after potential skips
+            if (imageFilenames.length === 0) {
+                console.warn("Image list is empty or all images failed to load.");
+                imgElement.src = "https://via.placeholder.com/1920x1080?text=No+Valid+Images";
+                imgElement.alt = "Error: No valid images to display";
+                imgElement.classList.add('active');
+                clearInterval(slideshowInterval); // Stop the slideshow if no images
+                return;
+            }
+
+            // Prepare for loading this specific image
+            const filename = imageFilenames[indexToDisplay];
+
+            // --- Event Handlers for the current image load ---
+            // These functions are defined inside displayImage to capture `filename` for logging.
+            // They are also named for easy removal later.
+            function imgLoadHandler() {
+                imgElement.classList.add('active'); // Image loaded successfully, fade in
+                // Clean up these specific listeners after success
+                imgElement.removeEventListener('load', imgLoadHandler);
+                imgElement.removeEventListener('error', imgErrorHandler);
+            }
+
+            function imgErrorHandler() {
+                console.warn(`Failed to load image: ${filename}. Skipping.`);
+                // Clean up these specific listeners after error
+                imgElement.removeEventListener('load', imgLoadHandler);
+                imgElement.removeEventListener('error', imgErrorHandler);
+
+                // If this image fails, immediately try to display the next one.
+                // This makes sure bad images are skipped quickly.
+                currentIndex = getNextIndex(); // Advance to the next image's index
+                displayImage(currentIndex); // Call displayImage again with the new index
+            }
+
+            // --- Attach Listeners and Set Source ---
+            // Always remove previous listeners before adding new ones to prevent multiple firings
+            imgElement.removeEventListener('load', imgLoadHandler);
+            imgElement.removeEventListener('error', imgErrorHandler);
+            imgElement.addEventListener('load', imgLoadHandler);
+            imgElement.addEventListener('error', imgErrorHandler);
+
+            // Set the image source, which triggers the 'load' or 'error' event
+            imgElement.src = filename;
+            imgElement.alt = `Image ${indexToDisplay + 1}`; // Update alt text for accessibility
+        }
+
+        // --- Initial Setup and Interval Logic ---
 
         // Show the first image immediately
         if (imageFilenames.length > 0) {
-            imgElement.src = imageFilenames[currentIndex];
-            imgElement.alt = `Image ${currentIndex + 1}`;
-            imgElement.classList.add('active'); // Make first image visible immediately
-            currentIndex = (currentIndex + 1) % imageFilenames.length;
+            displayImage(currentIndex); // Display the very first image
 
-            // Start the slideshow after the first image has been displayed
-            setInterval(showNextImage, displayDuration);
+            // Set up the interval for rotation
+            // The interval triggers the fade-out, then after the fade, it loads the next image.
+            // The total cycle duration for each image is (displayDuration + fadeDuration).
+            slideshowInterval = setInterval(() => {
+                imgElement.classList.remove('active'); // Start fade-out of current image
+
+                // After fade-out completes, advance index and load the next image
+                setTimeout(() => {
+                    currentIndex = getNextIndex(); // Move to the next image's index
+                    displayImage(currentIndex); // Load and display the next image
+                }, fadeDuration); // Wait for the fade-out to finish
+            }, displayDuration + fadeDuration); // Set the interval for the complete cycle duration
         } else {
+            // Fallback if no images are defined in the array initially
             console.warn("No images listed in imageFilenames array. Please add your image names.");
-            // Optionally display a placeholder or message if no images are found
-            imgElement.src = "https://via.placeholder.com/1920x1080?text=No+Images+Found";
+            imgElement.src = "https://via.placeholder.com/1920x1080?text=Error:+No+Images";
             imgElement.alt = "Placeholder image: No images found";
             imgElement.classList.add('active');
         }
