@@ -3,139 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Page Photo Display</title>
+    <title>Welcome to Vista Bay, Zihua!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Prevent scrollbars if image is slightly larger than viewport */
-            background-color: #000; /* Black background for transition */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        #fullscreen-image {
-            position: absolute; /* Allows it to cover the entire viewport */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* This makes the image cover the entire area without distortion, cropping as needed */
-            object-position: center; /* Center the image within its bounds */
-            opacity: 0; /* Start hidden for fade-in effect */
-            transition: opacity 1s ease-in-out; /* Smooth fade transition */
+        .font-pacifico {
+            font-family: 'Pacifico', cursive;
         }
-        #fullscreen-image.active {
-            opacity: 1; /* Make visible when active */
+        /* Style for the background image */
+        .bg-hero {
+            background-image: url('https://yb-denav.github.io/vistabay/images/bg_brickwall.jpg');
+            background-size: cover;
+            background-position: center;
         }
     </style>
 </head>
-<body>
+<body class="bg-hero flex items-center justify-center min-h-screen p-4">
+    <!-- This container enforces the 16:9 aspect ratio -->
+    <div class="w-full max-w-6xl aspect-video">
+        <!-- Main slide content container -->
+        <div class="w-full h-full flex items-center justify-center">
+            <!-- Semi-transparent card for readability -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 w-11/12 h-11/12 text-center flex flex-col justify-center">
+                
+                <!-- Headline -->
+                <h1 class="font-pacifico text-8xl md:text-9xl text-cyan-700 mb-12">
+                    ¡Bienvenidos a Vista Bay, Zihua!
+                </h1>
 
-    <img id="fullscreen-image" src="" alt="Rotating Image">
+                <!-- Wi-Fi Information -->
+                <div class="bg-gray-50 rounded-xl p-8 text-left shadow-inner">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                        <!-- Left Side: Text Info -->
+                        <div class="flex-1">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-wifi text-5xl text-cyan-600 mr-4"></i>
+                                <h2 class="text-5xl font-bold text-gray-800">Connect to Wi-Fi</h2>
+                            </div>
+                            <div class="space-y-6 text-5xl">
+                                <p class="text-gray-700">
+                                    <span class="font-semibold">Network:</span> 
+                                    <span class="text-gray-900">101 Vista Bay</span>
+                                </p>
+                                <p class="text-gray-700">
+                                    <span class="font-semibold">Password:</span> 
+                                    <span class="text-gray-900">101VistaBay</span>
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Right Side: QR Code -->
+                        <div class="flex-shrink-0 text-center">
+                            <p class="font-semibold text-2xl text-gray-700 mb-2">Scan to Connect</p>
+                            <img src="https://yb-denav.github.io/vistabay/images/qr_wifi.svg" alt="Wi-Fi QR Code" class="rounded-lg shadow-md mx-auto" width="250" height="250">
+                        </div>
+                    </div>
+                </div>
 
-    <script>
-        // === IMPORTANT: List your image filenames here ===
-        // Ensure these names EXACTLY match the files in the '3b/images' folder, including case.
-        const imageFilenames = [
-            'slide01.jpg',
-            'slide02.jpg',
-            'slide03.jpg',
-            'slide04.jpg',
-            'slide05.jpg',
-            'slide06.jpg',
-            'slide07.jpg',
-            'slide08.jpg',
-            'slide09.jpg',
-            'slide10.jpg'
-        ];
-
-        let currentIndex = 0;
-        let slideshowInterval; // Variable to hold our interval ID
-        const imgElement = document.getElementById('fullscreen-image');
-        const fadeDuration = 0; // 1 second for fade transition
-        const displayDuration = 15000; // 15 seconds display time per image (before fade-out starts)
-
-        // Function to safely get the next index, looping around
-        function getNextIndex() {
-            return (currentIndex + 1) % imageFilenames.length;
-        }
-
-        // Function to display an image at a specific index
-        function displayImage(indexToDisplay) {
-            // Check if there are any images left to display after potential skips
-            if (imageFilenames.length === 0) {
-                console.warn("Image list is empty or all images failed to load.");
-                imgElement.src = "https://via.placeholder.com/1920x1080?text=No+Valid+Images";
-                imgElement.alt = "Error: No valid images to display";
-                imgElement.classList.add('active');
-                clearInterval(slideshowInterval); // Stop the slideshow if no images
-                return;
-            }
-
-            // Prepare for loading this specific image
-            const filename = imageFilenames[indexToDisplay];
-
-            // --- Event Handlers for the current image load ---
-            // These functions are defined inside displayImage to capture `filename` for logging.
-            // They are also named for easy removal later.
-            function imgLoadHandler() {
-                imgElement.classList.add('active'); // Image loaded successfully, fade in
-                // Clean up these specific listeners after success
-                imgElement.removeEventListener('load', imgLoadHandler);
-                imgElement.removeEventListener('error', imgErrorHandler);
-            }
-
-            function imgErrorHandler() {
-                console.warn(`Failed to load image: ${filename}. Skipping.`);
-                // Clean up these specific listeners after error
-                imgElement.removeEventListener('load', imgLoadHandler);
-                imgElement.removeEventListener('error', imgErrorHandler);
-
-                // If this image fails, immediately try to display the next one.
-                // This makes sure bad images are skipped quickly.
-                currentIndex = getNextIndex(); // Advance to the next image's index
-                displayImage(currentIndex); // Call displayImage again with the new index
-            }
-
-            // --- Attach Listeners and Set Source ---
-            // Always remove previous listeners before adding new ones to prevent multiple firings
-            imgElement.removeEventListener('load', imgLoadHandler);
-            imgElement.removeEventListener('error', imgErrorHandler);
-            imgElement.addEventListener('load', imgLoadHandler);
-            imgElement.addEventListener('error', imgErrorHandler);
-
-            // Set the image source, which triggers the 'load' or 'error' event
-            imgElement.src = filename;
-            imgElement.alt = `Image ${indexToDisplay + 1}`; // Update alt text for accessibility
-        }
-
-        // --- Initial Setup and Interval Logic ---
-
-        // Show the first image immediately
-        if (imageFilenames.length > 0) {
-            displayImage(currentIndex); // Display the very first image
-
-            // Set up the interval for rotation
-            // The interval triggers the fade-out, then after the fade, it loads the next image.
-            // The total cycle duration for each image is (displayDuration + fadeDuration).
-            slideshowInterval = setInterval(() => {
-                imgElement.classList.remove('active'); // Start fade-out of current image
-
-                // After fade-out completes, advance index and load the next image
-                setTimeout(() => {
-                    currentIndex = getNextIndex(); // Move to the next image's index
-                    displayImage(currentIndex); // Load and display the next image
-                }, fadeDuration); // Wait for the fade-out to finish
-            }, displayDuration + fadeDuration); // Set the interval for the complete cycle duration
-        } else {
-            // Fallback if no images are defined in the array initially
-            console.warn("No images listed in imageFilenames array. Please add your image names.");
-            imgElement.src = "https://via.placeholder.com/1920x1080?text=Error:+No+Images";
-            imgElement.alt = "Placeholder image: No images found";
-            imgElement.classList.add('active');
-        }
-
-    </script>
-
+            </div>
+        </div>
+    </div>
 </body>
 </html>
